@@ -3,6 +3,7 @@ name: Check sub count
 on:
   schedule:
     - cron: "*/5 * * * *"
+  workflow_dispatch:
 
 jobs:
   check:
