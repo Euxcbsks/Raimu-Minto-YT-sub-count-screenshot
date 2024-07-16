@@ -94,8 +94,8 @@ if __name__ == "__main__":
 
     if SUB_COUNT_PATH.exists() and sub_count_now == SUB_COUNT_PATH.read_text():
         sys.exit(0)
-
     SUB_COUNT_PATH.write_text(sub_count_now)
+
     set_dark_theme()
     screenshot: bytes = driver.find_element(By.TAG_NAME, "yt-page-header-renderer").screenshot_as_png
     driver.quit()
