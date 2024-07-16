@@ -5,6 +5,7 @@ from io import BytesIO
 from os import getenv
 from pathlib import Path
 
+from discord_webhook import DiscordWebhook
 from PIL import Image
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -27,6 +28,12 @@ if CHROME_PATH is None:
     msg = "CHROME_PATH is not set"
     raise ValueError(msg)
 
+WEBHOOK_URI = getenv("WEBHOOK_URI")
+
+if WEBHOOK_URI is None:
+    msg = "WEBHOOK_URI is not set"
+    raise ValueError(msg)
+
 SETTINGS_LOCATOR = (By.XPATH, "//button[@aria-label='設定']")
 CHANGE_THEME_LOCATOR = (By.TAG_NAME, "ytd-toggle-theme-compact-link-renderer")
 DARK_THEME_LOCATOR = (By.XPATH, "//tp-yt-paper-item//yt-formatted-string[text()='深色主題']")
@@ -35,6 +42,7 @@ CHANNEL_INFO_LOCATOR = (
     By.XPATH,
     "//span[contains(@class, 'yt-core-attributed-string yt-content-metadata-view-model-wiz__metadata-text')]",
 )
+WEBHOOK = DiscordWebhook(url=WEBHOOK_URI)
 
 options = webdriver.ChromeOptions()
 options.binary_location = CHROME_PATH
@@ -101,3 +109,9 @@ if __name__ == "__main__":
     driver.quit()
 
     Image.open(BytesIO(screenshot)).crop((0, 0, TARGET_SCREENSHOT_WIDTH, RAW_SCREENSHOT_HEIGHT)).save("screenshot.png")
+
+    WEBHOOK.add_file(screenshot, "screenshot.png")
+
+    if (response := WEBHOOK.execute()).status_code not in [200, 204]:
+        msg = f"Failed to send webhook: {response.text}"
+        raise RuntimeError(msg)
