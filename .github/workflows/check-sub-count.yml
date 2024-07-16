@@ -26,11 +26,11 @@ jobs:
           python3 -m pip install -r requirements.txt
       - name: Run check sub count
         run: |
-          echo "::set-output name=sub_count_prev::$(cat sub-count)"
+          echo "sub_count_prev=$(cat sub-count) >> $GITHUB_OUTPUT"
           CHROME_PATH=${{ steps.setup-chrome.outputs.chrome-path }} python3 main.py
           git diff --exit-code sub-count
-          echo "::set-output name=has_changes::$(($? != 0))"
-          echo "::set-output name=sub_count_curr::$(cat sub-count)"
+          echo "has_changes=$($? != 0) >> $GITHUB_OUTPUT"
+          echo "sub_count_curr=$(cat sub-count) >> $GITHUB_OUTPUT"
         id: check
       - name: "Commit and push sub-count"
         if: steps.check.outputs.has_changes == 'true'
