@@ -61,6 +61,18 @@ def get_page() -> None:
     WebDriverWait(driver, 10).until(ec.visibility_of_element_located((By.TAG_NAME, "ytd-app")))
 
 
+def extract_sub_count() -> str:
+    """Extract sub count from the page."""
+    return next(
+        _extract_sub_count(text)
+        for element in driver.find_elements(
+            By.XPATH,
+            "//span[contains(@class, 'yt-core-attributed-string yt-content-metadata-view-model-wiz__metadata-text')]",
+        )
+        if "訂閱者" in (text := element.text)
+    )
+
+
 def set_dark_theme() -> None:
     """Set dark theme."""
     driver.find_element(By.XPATH, "//button[@aria-label='設定']").click()
@@ -73,18 +85,6 @@ def set_dark_theme() -> None:
     )
     driver.find_element(By.XPATH, "//tp-yt-paper-item//yt-formatted-string[text()='深色主題']").click()
     WebDriverWait(driver, 10).until(ec.visibility_of_element_located((By.TAG_NAME, "ytd-app")))
-
-
-def extract_sub_count() -> str:
-    """Extract sub count from the page."""
-    return next(
-        _extract_sub_count(text)
-        for element in driver.find_elements(
-            By.XPATH,
-            "//span[contains(@class, 'yt-core-attributed-string yt-content-metadata-view-model-wiz__metadata-text')]",
-        )
-        if "訂閱者" in (text := element.text)
-    )
 
 
 if __name__ == "__main__":
