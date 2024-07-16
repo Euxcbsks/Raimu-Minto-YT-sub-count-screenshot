@@ -27,7 +27,7 @@ jobs:
       - name: Run check sub count
         run: |
           echo "sub_count_prev=$(cat sub-count) >> $GITHUB_OUTPUT"
-          CHROME_PATH=${{ steps.setup-chrome.outputs.chrome-path }} python3 main.py
+          CHROME_PATH=${{ steps.setup-chrome.outputs.chrome-path }} WEBHOOK_URI=${{ secrets.WEBHOOK_URI }} python3 main.py
           git diff --exit-code sub-count
           echo "has_changes=$($? != 0) >> $GITHUB_OUTPUT"
           echo "sub_count_curr=$(cat sub-count) >> $GITHUB_OUTPUT"
