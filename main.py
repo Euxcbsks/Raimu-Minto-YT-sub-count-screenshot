@@ -2,6 +2,7 @@
 
 import sys
 from io import BytesIO
+from os import getenv
 from pathlib import Path
 
 from PIL import Image
@@ -20,8 +21,14 @@ TARGET_SCREENSHOT_WIDTH = 600
 # 訂閱數暫存檔路徑
 SUB_COUNT_PATH = Path("sub-count")
 
+CHROME_PATH = getenv("CHROME_PATH")
+
+if CHROME_PATH is None:
+    msg = "CHROME_PATH is not set"
+    raise ValueError(msg)
+
 options = webdriver.ChromeOptions()
-options.binary_location = "/usr/bin/brave-browser"
+options.binary_location = CHROME_PATH
 options.add_argument("--headless")
 options.add_argument("--disabled-dev-shm-usage")
 options.add_argument("--lang=zh-TW")
