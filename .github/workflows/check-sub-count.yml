@@ -1,0 +1,47 @@
+name: Check sub count
+
+on:
+  schedule:
+    - cron: "*/5 * * * *"
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4.1.7
+      - name: Setup chrome
+        uses: browser-actions/setup-chrome@v1.7.2
+        with:
+          install-chromedriver: true
+        id: setup-chrome
+      - name: Setup Python 3.12
+        uses: actions/setup-python@v5.1.0
+        with:
+          python-version: "3.12"
+      - name: Install Python dependencies
+        run: |
+          python3 -m pip install --upgrade pip
+          python3 -m pip install -r requirements.txt
+      - name: Run check sub count
+        run: |
+          echo "::set-output name=sub_count_prev::$(cat sub-count)"
+          CHROME_PATH=${{ steps.setup-chrome.outputs.chrome-path }} python3 main.py
+          git diff --exit-code sub-count
+          echo "::set-output name=has_changes::$(($? != 0))"
+          echo "::set-output name=sub_count_curr::$(cat sub-count)"
+        id: check
+      - name: "Commit and push sub-count"
+        if: steps.check.outputs.has_changes == 'true'
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add sub-count
+          git commit -m "Update sub-count (`${{ steps.check.outputs.sub_count_prev }}`->`${{ steps.check.outputs.sub_count_curr}}`)"
+          git push
+      - name: Upload screenshot as artifact
+        if: steps.check.outputs.has_changes == 'true'
+        uses: actions/upload-artifact@v4.3.4
+        with:
+          name: screenshot
+          path: screenshot.png
