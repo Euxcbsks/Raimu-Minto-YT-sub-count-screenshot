@@ -27,6 +27,15 @@ if CHROME_PATH is None:
     msg = "CHROME_PATH is not set"
     raise ValueError(msg)
 
+SETTINGS_LOCATOR = (By.XPATH, "//button[@aria-label='設定']")
+CHANGE_THEME_LOCATOR = (By.TAG_NAME, "ytd-toggle-theme-compact-link-renderer")
+DARK_THEME_LOCATOR = (By.XPATH, "//tp-yt-paper-item//yt-formatted-string[text()='深色主題']")
+APP_LOCATOR = (By.TAG_NAME, "ytd-app")
+CHANNEL_INFO_LOCATOR = (
+    By.XPATH,
+    "//span[contains(@class, 'yt-core-attributed-string yt-content-metadata-view-model-wiz__metadata-text')]",
+)
+
 options = webdriver.ChromeOptions()
 options.binary_location = CHROME_PATH
 options.add_argument("--headless")
@@ -65,26 +74,20 @@ def extract_sub_count() -> str:
     """Extract sub count from the page."""
     return next(
         _extract_sub_count(text)
-        for element in driver.find_elements(
-            By.XPATH,
-            "//span[contains(@class, 'yt-core-attributed-string yt-content-metadata-view-model-wiz__metadata-text')]",
-        )
+        for element in driver.find_elements(*CHANNEL_INFO_LOCATOR)
         if "訂閱者" in (text := element.text)
     )
 
 
 def set_dark_theme() -> None:
     """Set dark theme."""
-    driver.find_element(By.XPATH, "//button[@aria-label='設定']").click()
-    WebDriverWait(driver, 10).until(
-        ec.visibility_of_element_located((By.TAG_NAME, "ytd-toggle-theme-compact-link-renderer")),
-    )
-    driver.find_element(By.TAG_NAME, "ytd-toggle-theme-compact-link-renderer").click()
-    WebDriverWait(driver, 10).until(
-        ec.visibility_of_element_located((By.XPATH, "//tp-yt-paper-item//yt-formatted-string[text()='深色主題']")),
-    )
-    driver.find_element(By.XPATH, "//tp-yt-paper-item//yt-formatted-string[text()='深色主題']").click()
-    WebDriverWait(driver, 10).until(ec.visibility_of_element_located((By.TAG_NAME, "ytd-app")))
+    WebDriverWait(driver, 10).until(ec.visibility_of_element_located(SETTINGS_LOCATOR))
+    driver.find_element(*SETTINGS_LOCATOR).click()
+    WebDriverWait(driver, 10).until(ec.visibility_of_element_located(CHANGE_THEME_LOCATOR))
+    driver.find_element(*CHANGE_THEME_LOCATOR).click()
+    WebDriverWait(driver, 10).until(ec.visibility_of_element_located(DARK_THEME_LOCATOR))
+    driver.find_element(*DARK_THEME_LOCATOR).click()
+    WebDriverWait(driver, 10).until(ec.visibility_of_element_located(APP_LOCATOR))
 
 
 if __name__ == "__main__":
