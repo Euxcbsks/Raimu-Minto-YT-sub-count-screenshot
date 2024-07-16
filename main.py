@@ -72,6 +72,7 @@ def get_page() -> None:
 
 def extract_sub_count() -> str:
     """Extract sub count from the page."""
+    WebDriverWait(driver, 10).until(ec.visibility_of_element_located(CHANNEL_INFO_LOCATOR))
     return next(
         _extract_sub_count(text)
         for element in driver.find_elements(*CHANNEL_INFO_LOCATOR)
